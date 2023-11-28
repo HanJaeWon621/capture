@@ -4,6 +4,7 @@ import keyboard
 import sys
 from PIL import ImageGrab, Image
 from reportlab.pdfgen import canvas
+from datetime import datetime
 # 전체 화면 캡처를 저장할 폴더
 capture_folder = "c:\\captured_images"
 capture_folder_pdf = "c:\\captured_pdf"
@@ -12,6 +13,7 @@ epub_folder = "c:\\epub"
 output_pdf1 = "merged_file.pdf"
 output_epub1 = 'output.epub'
 pageCnt = 0
+formatted_datetime=""
 #capture_folder = "c:\\captured_images"
 #capture_folder_pdf = "c:\\captured_pdf"
 # 폴더가 없으면 생성
@@ -27,8 +29,8 @@ output_file_nm = sys.argv[2]
 cpGap = 1
 if sys.argv[3] != None:
     cpGap = int(sys.argv[3])
-output_pdf1 = output_file_nm +".pdf"
-output_epub1 = output_file_nm +'.epub'
+output_pdf1 = output_file_nm + "_"+formatted_datetime +".pdf"
+output_epub1 = output_file_nm +"_"+formatted_datetime +'.epub'
 #한개 PDF파일로 취합
 def merge_pdfs(output_path, pdf_list):
     merger = PyPDF2.PdfFileMerger()
@@ -86,7 +88,9 @@ def perform_capture_sequence():
         print(f"{filename} 저장 완료")
 
         # 아래 화살표 1번 클릭
-        keyboard.press('down')
+        #keyboard.press('down')
+        current_mouse_position = pyautogui.position()
+        pyautogui.click(current_mouse_position)
 
     print("반복 작업 완료")
     # 합치고자 하는 PDF 파일의 리스트
@@ -122,11 +126,25 @@ def image_to_pdf(image_path, pdf_path):
     # PDF 저장
     pdf.save()
 
-
-
+def set_save_path():
+    #capture_folder = "c:\\captured_images"
+    #capture_folder_pdf = "c:\\captured_pdf"
+    # Get current date and time
+    current_datetime = datetime.now()
+    global capture_folder
+    global capture_folder_pdf
+    # Format the date and time as a string
+    global formatted_datetime
+    formatted_datetime = current_datetime.strftime("%Y-%m-%d%H%M")
+    capture_folder = capture_folder + "\\" + formatted_datetime
+    capture_folder_pdf = capture_folder_pdf + "\\" + formatted_datetime
+    print(formatted_datetime)
+    os.makedirs(capture_folder, exist_ok=True)
+    os.makedirs(capture_folder_pdf, exist_ok=True)
 if __name__ == "__main__":
     # 변환할 PDF 파일 경로와 EPUB 출력 경로 설정
-    
+    # d 키를 누르면 저장폴더 수행
+    keyboard.add_hotkey('d', set_save_path)
     # S 키를 누르면 반복 작업 수행
     keyboard.add_hotkey('s', perform_capture_sequence)
 
